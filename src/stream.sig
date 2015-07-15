@@ -75,17 +75,51 @@ sig
 
     (* The canonical unfolding operator streams should give rise to.
      * The idea is that you supply a seed and an unfolding operation.
-     * unfold will create a stream by applying the seed
+     * unfold will create a stream by applying the seed to the supplied
+     * function.
      *
-     * This can be used to create potentially infinite streams.
+     *   - If NONE is returned it returns empty and halts
+     *   - If SOME (a, b') is returned, it returns a stream with
+     *     a at the head whose tail lazily computes [unfold f b']
+     *
+     * This can be used to create potentially infinite streams quite
+     * easily.
      *)
     val unfold   : ('b -> ('a * 'b) option) -> 'b -> 'a t
 
+    (* A nice convience for treating streams as nondeterministic computations.
+     * [ifte i t e] behaves thusly
+     *
+     * If [i] contains at least one element (succeeds at all) then we will
+     * return [i >>- t], otherwise, we will return e. This means that the
+     * results of t and e will *never* show up in the results together.
+     *)
     val ifte : 'a t -> ('a -> 'b t) -> 'b t -> 'b t
+
+    (* This truncates a stream so that it only contains one element.
+     * This is useful it is being handled as a nondeterministic computation
+     * and we're only interested in using one of its results.
+     *)
     val once : 'a t -> 'a t
 
+    (* This behaves like a safe version of hd and tl for streams. It will
+     * return the first element of a stream and the tail of it *if* the stream
+     * is non-empty. Otherwise, it will just return NONE
+     *
+     * This should always terminate for stream values unless one has improperly
+     * used [delay] and created a stream which is just an infinite stack of
+     * [delay]s. For example [fun bad () = delay bad]
+     *)
     val uncons  : 'a t -> ('a * 'a t) option
+
+    (* This has similar properties to uncons but just returns a finite prefix
+     * of a stream, raising Empty if there aren't enough elements
+     *)
     exception Empty
     val observe : int -> 'a t -> 'a list
+
+    (* [toList s] will terminate with a list containing the elements of s
+     * if s is finite, otherwise it will loop forever
+     *)
     val toList : 'a t -> 'a list
 end
