@@ -16,5 +16,7 @@ sig
     val ifte : 'a t -> ('a -> 'b t) -> 'b t -> 'b t
     val once : 'a t -> 'a t
 
-    val uncons : 'a t -> ('a * 'a t) option
+    val uncons  : 'a t -> ('a * 'a t) option
+    exception Empty
+    val observe : int -> 'a t -> 'a list
 end

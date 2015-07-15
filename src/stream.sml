@@ -14,6 +14,13 @@ struct
         | CONS (a, t) => SOME (a, t)
         | PAUSE p => uncons (p ())
 
+    exception Empty
+    fun observe 0 s = []
+      | observe i s =
+      case uncons s of
+          NONE => raise Empty
+        | SOME (a, s') => a :: observe (i - 1) s'
+
     fun map f s =
       case s of
           NIL => NIL
