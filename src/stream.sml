@@ -21,6 +21,12 @@ struct
           NONE => raise Empty
         | SOME (a, s') => a :: observe (i - 1) s'
 
+    fun toList s =
+      case s of
+          NIL => []
+        | CONS (a, s') => a :: toList s'
+        | PAUSE p => toList (p ())
+
     fun map f s =
       case s of
           NIL => NIL

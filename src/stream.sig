@@ -19,4 +19,5 @@ sig
     val uncons  : 'a t -> ('a * 'a t) option
     exception Empty
     val observe : int -> 'a t -> 'a list
+    val toList : 'a t -> 'a list
 end
