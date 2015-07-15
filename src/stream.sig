@@ -52,6 +52,21 @@ sig
      * However, it does this in such a way that if any component is finitely
      * reachable in any of the resulting ['b t]'s, it has a finite index
      * in the output.
+     *
+     * However, since merging doesn't preserve order, it isn't the case that
+     * >>- follows the monad laws. If you're viewing 'a t as a nondeterministic
+     * computation anyways, then this is fine. Otherwise, you can use >>=
+     * proper.
+     *)
+    val >>- : 'a t * ('a -> 'b t) -> 'b t
+
+    (* This will follow the monad laws together with [return]. It behaves
+     * exactly like mapping a function over a stream and then appending the
+     * results.
+     *
+     * However unlike >>- it's not guarenteed that all finitely reachable
+     * elements in results of the function supplied will have a finite index
+     * in the final stream.
      *)
     val >>= : 'a t * ('a -> 'b t) -> 'b t
 

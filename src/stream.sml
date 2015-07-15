@@ -40,12 +40,26 @@ struct
         | PAUSE p => PAUSE (fn () => merge r (p ()))
 
     fun return a = CONS (a, NIL)
-    fun >>= (s, f) =
+    fun >>- (s, f) =
       case s of
           NIL => NIL
-        | CONS (a, s') => merge (f a) (>>= (s', f))
-        | PAUSE p => PAUSE (fn () => >>= (p (), f))
-    infixr 1 >>=
+        | CONS (a, s') => merge (f a) (>>- (s', f))
+        | PAUSE p => PAUSE (fn () => >>- (p (), f))
+    infixr 1 >>-
+
+    fun >>= (s, f) =
+        let
+          fun concat ss =
+              case ss of
+                  NIL => NIL
+                | PAUSE p => PAUSE (fn () => concat (p ()))
+                | CONS (NIL, ss') => concat ss'
+                | CONS (CONS (a, s), ss') => CONS (a, concat (CONS (s, ss')))
+                | CONS (PAUSE p, ss') =>
+                  PAUSE (fn () => concat (CONS (p (), ss')))
+        in
+          concat (map f s)
+        end
 
     fun unfold f b =
       case f b of
@@ -61,7 +75,7 @@ struct
     fun ifte i t e =
         case uncons i of
             NONE => e
-          | SOME (a, b) => CONS (a, b) >>= t
+          | SOME (a, b) => CONS (a, b) >>- t
 
     fun once s =
       case uncons s of
